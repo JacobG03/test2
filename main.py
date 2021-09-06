@@ -23,6 +23,6 @@ cookies = {
 response = requests.get(search_engine_url + target_url, cookies=cookies)
 soup = BeautifulSoup(response.text, 'html.parser')
 
-links = soup.find_all("a", {"data-ved": "2ahUKEwjmr5HolujyAhXNzaQKHdXpCpcQFnoECAIQAQ"})
+links = soup.find_all("div", {"class": "g"})
 
-print(soup)
+print(links)
