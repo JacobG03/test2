@@ -22,6 +22,8 @@ cookies = {
   'SID': sid,
 }
 
+headers = {'User-agent': 'agent 0.1'}
+
 
 # Read's and returns a list of keywords
 def getKeywords():
@@ -42,7 +44,7 @@ def getLinks(keywords, pages):
     for i in range(pages):
       paginated_query = f'{query}{pagination}{i * 10}'
 
-      response = requests.get(paginated_query)
+      response = requests.get(paginated_query, headers=headers, cookies=cookies)
       soup = BeautifulSoup(response.text, 'html.parser')
 
       if total_results == None:
@@ -59,7 +61,8 @@ def getLinks(keywords, pages):
             links.append(valid['href'])
       
       print(f'Page {i + 1}/{pages}')
-      time.sleep(5)
+      # Pause to avoid getting blocked
+      time.sleep(10)
       
       # also find max results here and append with links
     results.append({
@@ -74,17 +77,21 @@ def getLinks(keywords, pages):
 
 
 def getTotalResults(soup):
-  print(soup.prettify())
   return 100
 
 # Returns proper links
 def validateHref(href):
   href = href.split('/')
-  href = f'https://{href[3]}/{href[4]}/{href[5]}'
-  return {'valid': True, 'href': href}
+  if '&' in href[4] or '&' in href[5]:
+    return {'valid': False}
+  try:
+    link = f'https://{href[3]}/{href[4]}/{href[5]}'
+  except:
+    link = f'https://{href[3]}/{href[4]}'
+
+  return {'valid': True, 'href': link}
 
 
 keywords = getKeywords()
 results = getLinks(keywords, 3)
-
-
+print(results)
