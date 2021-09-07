@@ -20,6 +20,7 @@ cookies = {
   'SID': sid,
 }
 
+
 # Read's and returns a list of keywords
 def getKeywords():
   with open('keywords.txt', 'r') as file:
