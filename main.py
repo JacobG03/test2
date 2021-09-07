@@ -5,6 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 import time
 import csv
+from selenium import webdriver
 
 
 # Loads .env variables
@@ -24,7 +25,6 @@ cookies = {
 }
 
 headers = {'User-agent': 'agent 0.1'}
-
 
 # Read's and returns a list of keywords
 def getKeywords():
@@ -49,7 +49,7 @@ def getLinks(keywords, pages):
       soup = BeautifulSoup(response.text, 'html.parser')
 
       if total_results == None:
-        total_results = getTotalResults(soup)
+        total_results = getTotalResults(paginated_query)
 
       parent_divs = soup.find_all("div", {"class": "kCrYT"})
 
@@ -78,9 +78,18 @@ def getLinks(keywords, pages):
   return results
 
 
-def getTotalResults(soup):
-  # Get the total result data using selenium
-  return 'Unknown'
+def getTotalResults(url):
+  browser = webdriver.Chrome(executable_path='./chromedriver')
+  print('opened')
+  browser.get(url)
+  print('opened2')
+  result_div = browser.find_element_by_id('result-stats').text
+  result_div = result_div.split(' ')
+  result_string = result_div[1] + result_div[2]
+  print(result_string)
+  browser.quit()
+  print('closed')
+  return int(result_string)
 
 # Returns a valid link
 def validateHref(href):
@@ -102,6 +111,7 @@ def validateHref(href):
 
 keywords = getKeywords()
 results = getLinks(keywords, 3)
+print(results)
 
 with open('links.csv', mode='w') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=['link', 'keyword'])
