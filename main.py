@@ -76,11 +76,10 @@ def getLinks(keywords, pages):
 
 
 def getTotalResults(soup):
-  total_result = soup.find('div', {'id': 'result-stats'})
-  print(total_result.text)
-  return 100
+  # Get the total result data using selenium
+  return 'Unknown'
 
-# Returns proper links
+# Returns a valid link
 def validateHref(href):
   href = href.split('/')
   if '&' in href[4] or '&' in href[5]:
