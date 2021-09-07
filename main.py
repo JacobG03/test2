@@ -1,9 +1,9 @@
-from typing import Counter
 import requests
 from bs4 import BeautifulSoup
 from os.path import join, dirname
 from os import environ
 from dotenv import load_dotenv
+import time
 
 
 # Loads .env variables
@@ -16,6 +16,7 @@ sid = environ.get('SID')
 
 search_engine_url = 'https://www.google.com/search?q='
 target_url = 'site:https://www.searchenginejournal.com/'
+pagination = '&start='
 
 cookies = {
   'SID': sid,
@@ -33,44 +34,57 @@ def getKeywords():
 def getLinks(keywords, pages):
   results = []
   for count, word in enumerate(keywords):
-    query = f'{search_engine_url}{target_url} {word}'
-
-    response = requests.get(query, cookies=cookies)
-    soup = BeautifulSoup(response.text, 'html.parser')
-
-    parent_divs = soup.find_all("div", {"class": "kCrYT"})
-
     links = []
-    for element in parent_divs:
-      a = element.find('a', href=True)
-      if a:
-        valid = validateHref(a['href'])
-        if valid['valid']:
-          print(valid['href'])
-          links.append(valid['href'])
-    
-    # also find max results here and append with links
-    results.append({word: links})
+    total_results = None
+
+    query = f'{search_engine_url}{target_url}%20{word}'
+
+    for i in range(pages):
+      paginated_query = f'{query}{pagination}{i * 10}'
+
+      response = requests.get(paginated_query)
+      soup = BeautifulSoup(response.text, 'html.parser')
+
+      if total_results == None:
+        total_results = getTotalResults(soup)
+
+      parent_divs = soup.find_all("div", {"class": "kCrYT"})
+
+      for element in parent_divs:
+        a = element.find('a', href=True)
+        if a:
+          valid = validateHref(a['href'])
+          if valid['valid']:
+            print(valid['href'])
+            links.append(valid['href'])
+      
+      print(f'Page {i + 1}/{pages}')
+      time.sleep(5)
+      
+      # also find max results here and append with links
+    results.append({
+      word: {
+        'links': links,
+        'results': total_results
+        }
+      })
     print(f'{count + 1}/{len(keywords)}')
 
   return results
 
 
+def getTotalResults(soup):
+  print(soup.prettify())
+  return 100
+
+# Returns proper links
 def validateHref(href):
   href = href.split('/')
-
-  for i in href:
-    try:
-      i = int(i)
-
-      index = href.index(str(i))
-      href = f'https://{href[index - 2]}/{href[index - 1]}/{str(i)}'
-
-      return {'valid': True, 'href': href}
-    except:
-      pass
-  return {'valid': False, 'href': href}
+  href = f'https://{href[3]}/{href[4]}/{href[5]}'
+  return {'valid': True, 'href': href}
 
 
-results = getLinks(getKeywords(), 5)
-print(results)
+keywords = getKeywords()
+results = getLinks(keywords, 3)
+
+
