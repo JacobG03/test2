@@ -57,7 +57,6 @@ def getLinks(keywords, pages):
         if a:
           valid = validateHref(a['href'])
           if valid['valid']:
-            print(valid['href'])
             links.append(valid['href'])
       
       print(f'Page {i + 1}/{pages}')
