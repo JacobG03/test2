@@ -80,15 +80,11 @@ def getLinks(keywords, pages):
 
 def getTotalResults(url):
   browser = webdriver.Chrome(executable_path='./chromedriver')
-  print('opened')
   browser.get(url)
-  print('opened2')
   result_div = browser.find_element_by_id('result-stats').text
   result_div = result_div.split(' ')
   result_string = result_div[1] + result_div[2]
-  print(result_string)
   browser.quit()
-  print('closed')
   return int(result_string)
 
 # Returns a valid link
@@ -120,3 +116,10 @@ with open('links.csv', mode='w') as csv_file:
     for i in results:
       for link in i['links']:
         writer.writerow({'link': link, 'keyword': i['keyword']})
+
+with open('results.csv', mode='w') as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=['keyword', 'results'])
+
+    writer.writeheader()
+    for i in results:
+      writer.writerow({'keyword': i['keyword'], 'results': i['results']})
