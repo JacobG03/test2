@@ -1,3 +1,4 @@
+from typing import Counter
 import requests
 from bs4 import BeautifulSoup
 from os.path import join, dirname
@@ -28,21 +29,48 @@ def getKeywords():
   return data.split(',')
 
 
+# keywords = [], pages = int
+def getLinks(keywords, pages):
+  results = []
+  for count, word in enumerate(keywords):
+    query = f'{search_engine_url}{target_url} {word}'
 
-response = requests.get(search_engine_url + target_url + ' tutorial', cookies=cookies)
-soup = BeautifulSoup(response.text, 'html.parser')
+    response = requests.get(query, cookies=cookies)
+    soup = BeautifulSoup(response.text, 'html.parser')
+
+    parent_divs = soup.find_all("div", {"class": "kCrYT"})
+
+    links = []
+    for element in parent_divs:
+      a = element.find('a', href=True)
+      if a:
+        valid = validateHref(a['href'])
+        if valid['valid']:
+          print(valid['href'])
+          links.append(valid['href'])
+    
+    # also find max results here and append with links
+    results.append({word: links})
+    print(f'{count + 1}/{len(keywords)}')
+
+  return results
 
 
-# Make it so that class is a variable working on every pc
-parent_divs = soup.find_all("div", {"class": "kCrYT"})
+def validateHref(href):
+  href = href.split('/')
 
-links = []
+  for i in href:
+    try:
+      i = int(i)
 
-for element in parent_divs:
-  a = element.find('a', href=True)
-  if a:
-    #! Format link
-    #* Remove string after /6 ditit number/ remove
-    links.append(a['href'])
+      index = href.index(str(i))
+      href = f'https://{href[index - 2]}/{href[index - 1]}/{str(i)}'
 
-print(links)
+      return {'valid': True, 'href': href}
+    except:
+      pass
+  return {'valid': False, 'href': href}
+
+
+results = getLinks(getKeywords(), 5)
+print(results)
