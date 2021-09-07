@@ -4,6 +4,7 @@ from os.path import join, dirname
 from os import environ
 from dotenv import load_dotenv
 import time
+import csv
 
 
 # Loads .env variables
@@ -60,16 +61,18 @@ def getLinks(keywords, pages):
             links.append(valid['href'])
       
       print(f'Page {i + 1}/{pages}')
+
       # Pause to avoid getting blocked
-      time.sleep(10)
-      
-      # also find max results here and append with links
+      time.sleep(10) 
+
+
+    # also find max results here and append with links
     results.append({
-      word: {
         'links': links,
+        'keyword': word,
         'results': total_results
-        }
-      })
+        })
+
     print(f'{count + 1}/{len(keywords)}')
 
   return results
@@ -96,6 +99,16 @@ def validateHref(href):
   return {'valid': True, 'href': link}
 
 
+
+
 keywords = getKeywords()
 results = getLinks(keywords, 3)
-print(results)
+
+with open('links.csv', mode='w') as csv_file:
+    writer = csv.DictWriter(csv_file, fieldnames=['link', 'keyword'])
+
+    writer.writeheader()
+    for i in results:
+      for link in i['links']:
+        print(link)
+        writer.writerow({'link': link, 'keyword': i['keyword']})
