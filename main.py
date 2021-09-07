@@ -77,6 +77,8 @@ def getLinks(keywords, pages):
 
 
 def getTotalResults(soup):
+  total_result = soup.find('div', {'id': 'result-stats'})
+  print(total_result.text)
   return 100
 
 # Returns proper links
