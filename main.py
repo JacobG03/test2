@@ -12,10 +12,12 @@ from selenium import webdriver
 dotenv_path = join(dirname(__file__), '.env')
 load_dotenv(dotenv_path)
 
+
 # Needed in order to avoid google cookie verification
 # SID cookie value
 sid = environ.get('SID')
 
+# Base URLs
 search_engine_url = 'https://www.google.com/search?q='
 target_url = 'site:https://www.searchenginejournal.com/'
 pagination = '&start='
@@ -24,7 +26,7 @@ cookies = {
   'SID': sid,
 }
 
-headers = {'User-agent': 'agent 0.1'}
+headers = {'User-agent': 'agent 0.2'}
 
 # Read's and returns a list of keywords
 def getKeywords():
@@ -34,6 +36,7 @@ def getKeywords():
 
 
 # keywords = [], pages = int
+# Main functio, retrieves all data
 def getLinks(keywords, pages):
   results = []
   for count, word in enumerate(keywords):
@@ -78,6 +81,7 @@ def getLinks(keywords, pages):
   return results
 
 
+# Retrieves the total search results number using selenium
 def getTotalResults(url):
   browser = webdriver.Chrome(executable_path='./chromedriver')
   browser.get(url)
@@ -87,7 +91,8 @@ def getTotalResults(url):
   browser.quit()
   return int(result_string)
 
-# Returns a valid link
+
+# Formats received href and returns a valid link
 def validateHref(href):
   href = href.split('/')
   if '&' in href[4] or '&' in href[5]:
@@ -103,12 +108,10 @@ def validateHref(href):
   return {'valid': True, 'href': link}
 
 
-
-
 keywords = getKeywords()
 results = getLinks(keywords, 3)
-print(results)
 
+# Save links to csv file
 with open('links.csv', mode='w') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=['link', 'keyword'])
 
@@ -117,6 +120,7 @@ with open('links.csv', mode='w') as csv_file:
       for link in i['links']:
         writer.writerow({'link': link, 'keyword': i['keyword']})
 
+# Save total results to csv file
 with open('results.csv', mode='w') as csv_file:
     writer = csv.DictWriter(csv_file, fieldnames=['keyword', 'results'])
 
