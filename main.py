@@ -95,7 +95,6 @@ def validateHref(href):
   except:
     link = f'https://{href[3]}/{href[4]}'
 
-  print(link)
   return {'valid': True, 'href': link}
 
 
@@ -110,5 +109,4 @@ with open('links.csv', mode='w') as csv_file:
     writer.writeheader()
     for i in results:
       for link in i['links']:
-        print(link)
         writer.writerow({'link': link, 'keyword': i['keyword']})
