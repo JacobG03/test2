@@ -20,9 +20,28 @@ cookies = {
   'SID': sid,
 }
 
-response = requests.get(search_engine_url + target_url, cookies=cookies)
+# Read's and returns a list of keywords
+def getKeywords():
+  with open('keywords.txt', 'r') as file:
+    data = file.read().replace('\n', '')  
+  return data.split(',')
+
+
+
+response = requests.get(search_engine_url + target_url + ' tutorial', cookies=cookies)
 soup = BeautifulSoup(response.text, 'html.parser')
 
-links = soup.find_all("div", {"class": "g"})
+
+# Make it so that class is a variable working on every pc
+parent_divs = soup.find_all("div", {"class": "kCrYT"})
+
+links = []
+
+for element in parent_divs:
+  a = element.find('a', href=True)
+  if a:
+    #! Format link
+    #* Remove string after /6 ditit number/ remove
+    links.append(a['href'])
 
 print(links)
