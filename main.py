@@ -84,11 +84,15 @@ def validateHref(href):
   href = href.split('/')
   if '&' in href[4] or '&' in href[5]:
     return {'valid': False}
+  if 'www.searchenginejournal.com' != href[3]:
+    return {'valid': False}
+
   try:
     link = f'https://{href[3]}/{href[4]}/{href[5]}'
   except:
     link = f'https://{href[3]}/{href[4]}'
 
+  print(link)
   return {'valid': True, 'href': link}
 
 
